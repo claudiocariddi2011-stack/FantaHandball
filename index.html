@@ -1,50 +1,62 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FantaHandball</title>
-<style>
-body{margin:0;font-family:Arial;background:#0f172a;color:#e5e7eb;padding-bottom:70px}
-header{background:#020617;padding:16px;text-align:center;font-size:24px;font-weight:bold}
-.screen{display:none;padding:20px;max-width:600px;margin:auto}
-.active{display:block}
-.card{background:#1e293b;border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer}
-.btn{background:#22c55e;color:#022c22;border:none;padding:8px 14px;border-radius:8px;font-weight:bold;cursor:pointer}
-input{width:100%;padding:8px;border-radius:6px;border:none;margin-bottom:10px}
-nav{position:fixed;bottom:0;left:0;right:0;background:#020617;display:flex;justify-content:space-around;padding:10px}
-nav button{background:none;border:none;color:#e5e7eb;font-size:14px}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fantahandball</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#0e7a3a;color:#fff}
+    header{padding:10px;background:#0b5f2d;text-align:center;font-weight:bold}
+    .screen{display:none;padding:16px}
+    .screen.active{display:block}
+    input,button{padding:8px;margin:4px}
+    button{cursor:pointer}
+    .nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .card{background:#ffffff;color:#000;border-radius:6px;padding:10px;margin:6px 0}
+  </style>
 </head>
 <body>
-<header>FantaHandball</header>
+<header>Fantahandball</header>
 
-<section id="login" class="screen active">
-  <h2>Login</h2>
-  <input id="usernameInput" placeholder="Il tuo nome">
-  <button class="btn" id="loginBtn">Entra</button>
-</section>
+<div id="login" class="screen active">
+  <h2>Entra</h2>
+  <input id="usernameInput" placeholder="Il tuo nome" />
+  <button onclick="login()">Entra</button>
+</div>
 
-<section id="home" class="screen">
-  <h2 id="welcome"></h2>
-  <input id="leagueName" placeholder="Nome nuova lega">
-  <button class="btn" id="createLeagueBtn">Crea Lega</button>
-  <h3>Leghe disponibili</h3>
-  <div id="leagues"></div>
-</section>
+<div id="home" class="screen">
+  <div id="welcome"></div>
+  <div class="nav">
+    <button onclick="showSection('leghe')">Leghe</button>
+    <button onclick="showSection('mercato')">Mercato</button>
+    <button onclick="showSection('rosa')">Rosa</button>
+  </div>
 
-<nav>
-  <button onclick="showScreen('home')">Home</button>
-</nav>
+  <div id="leghe" class="section">
+    <h3>Crea lega</h3>
+    <input id="leagueName" placeholder="Nome lega" />
+    <button onclick="createLeague()">Crea</button>
+    <h3>Leghe disponibili</h3>
+    <div id="leagues"></div>
+  </div>
 
-<!-- Firebase -->
+  <div id="mercato" class="section" style="display:none">
+    <h3>Mercato (asta)</h3>
+    <div id="players"></div>
+  </div>
+
+  <div id="rosa" class="section" style="display:none">
+    <h3>La tua rosa</h3>
+    <div id="myTeam"></div>
+  </div>
+</div>
+
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <script>
-// CONFIG FIREBASE
+// ================= FIREBASE CONFIG =================
 const firebaseConfig = {
   apiKey: "AIzaSyCTqPPwpfNElGluzwjv9nsy8EYBzJUXm2M",
   authDomain: "fantahandaball.firebaseapp.com",
@@ -53,99 +65,118 @@ const firebaseConfig = {
   messagingSenderId: "346312156685",
   appId: "1:346312156685:web:13cee4784534ad7f95d744"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// VARIABILI GLOBALI
-let username = '';
-let currentLeague = '';
+// ================= STATO =================
+let currentUser = null;
+let currentLeagueId = null;
+let credits = 100;
 
-// NAVIGAZIONE
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+// ================= LOGIN =================
+function login(){
+  const name = document.getElementById('usernameInput').value.trim();
+  if(!name){ alert('Inserisci il nome'); return; }
+  currentUser = name;
+  document.getElementById('welcome').innerText = 'Ciao ' + currentUser + ' | Crediti: ' + credits;
+  showScreen('home');
+}
+
+// ================= NAV =================
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-
-// LOGIN
-function login() {
-  const name = document.getElementById('usernameInput').value.trim();
-  if (!name) {
-    alert('Inserisci il nome');
-    return;
-  }
-  username = name;
-  document.getElementById('welcome').innerText = 'Ciao ' + username;
-  showScreen('home');
-  renderLeagues();
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.style.display='none');
+  document.getElementById(id).style.display='block';
 }
 
-// CREA LEGA (SALVATA SU FIREBASE)
-async function createLeague() {
-  const leagueName = document.getElementById('leagueName').value.trim();
-  if (!leagueName) {
-    alert('Inserisci il nome della lega');
-    return;
-  }
-
-  const ref = db.collection('leagues').doc(leagueName);
-  const snap = await ref.get();
-
-  if (snap.exists) {
-    alert('Questa lega esiste già');
-    return;
-  }
-
-  await ref.set({
-    owner: username,
-    members: [username],
+// ================= LEGHE =================
+function createLeague(){
+  const name = document.getElementById('leagueName').value.trim();
+  if(!name){ alert('Inserisci nome lega'); return; }
+  db.collection('leagues').add({
+    name,
+    owner: currentUser,
     createdAt: new Date()
   });
-
-  currentLeague = leagueName;
-  document.getElementById('leagueName').value = '';
-  alert('Lega creata con successo');
+  document.getElementById('leagueName').value='';
 }
 
-// MOSTRA LE LEGHE (IN TEMPO REALE)
-function renderLeagues() {
-  const container = document.getElementById('leagues');
+db.collection('leagues').orderBy('createdAt','desc').onSnapshot(snap=>{
+  const box = document.getElementById('leagues');
+  box.innerHTML='';
+  snap.forEach(doc=>{
+    const l = doc.data();
+    const div = document.createElement('div');
+    div.className='card';
+    div.innerHTML = `<b>${l.name}</b><br>Creatore: ${l.owner}`;
+    div.onclick = ()=>{ currentLeagueId = doc.id; alert('Entrato in ' + l.name); };
+    box.appendChild(div);
+  });
+});
 
-  db.collection('leagues').onSnapshot(snapshot => {
-    container.innerHTML = '';
-    snapshot.forEach(doc => {
-      const league = doc.data();
+// ================= GIOCATORI (MERCATO) =================
+const basePlayers = [
+  {name:'Claudio Cariddi',role:'Terzino',team:'Messina',price:10},
+  {name:'Cristian Falsaperla',role:'Terzino',team:'New Handball',price:10},
+  {name:'Roberto Abbate',role:'Centrale',team:'Messina',price:12},
+  {name:'Giulio Mazzeo',role:'Pivot',team:'Messina',price:14}
+];
+
+function seedPlayers(){
+  basePlayers.forEach(p=>db.collection('players').add({...p,owner:null}));
+}
+
+// ================= MERCATO =================
+db.collection('players').onSnapshot(snap=>{
+  const box = document.getElementById('players');
+  box.innerHTML='';
+  snap.forEach(doc=>{
+    const p = doc.data();
+    const div = document.createElement('div');
+    div.className='card';
+    div.innerHTML = `${p.name} (${p.role}) - ${p.team} - ${p.price} crediti`;
+    if(!p.owner){
+      const b = document.createElement('button');
+      b.innerText='Offri';
+      b.onclick=()=>buyPlayer(doc.id,p.price);
+      div.appendChild(document.createElement('br'));
+      div.appendChild(b);
+    } else {
+      div.innerHTML += '<br>Acquistato da ' + p.owner;
+    }
+    box.appendChild(div);
+  });
+});
+
+function buyPlayer(id,price){
+  if(price>credits){ alert('Crediti insufficienti'); return; }
+  db.collection('players').doc(id).update({ owner: currentUser });
+  credits -= price;
+  document.getElementById('welcome').innerText = 'Ciao ' + currentUser + ' | Crediti: ' + credits;
+}
+
+// ================= ROSA =================
+db.collection('players').where('owner','==',null).onSnapshot(()=>renderTeam());
+function renderTeam(){
+  const box = document.getElementById('myTeam');
+  box.innerHTML='';
+  db.collection('players').where('owner','==',currentUser).get().then(snap=>{
+    snap.forEach(doc=>{
+      const p = doc.data();
       const div = document.createElement('div');
-      div.className = 'card';
-      div.innerText = doc.id + ' - ' + league.members.length + ' squadre';
-      div.onclick = () => joinLeague(doc.id);
-      container.appendChild(div);
+      div.className='card';
+      div.innerText = p.name + ' - ' + p.role;
+      box.appendChild(div);
     });
   });
 }
-
-// ENTRA IN UNA LEGA
-async function joinLeague(name) {
-  const ref = db.collection('leagues').doc(name);
-  const snap = await ref.get();
-  if (!snap.exists) return;
-
-  let members = snap.data().members;
-  if (!members.includes(username)) {
-    members.push(username);
-    await ref.update({ members });
-  }
-
-  currentLeague = name;
-  alert('Sei entrato nella lega ' + name);
-}
-
-// EVENTI
-document.getElementById('loginBtn').addEventListener('click', login);
-document.getElementById('createLeagueBtn').addEventListener('click', createLeague);
 </script>
 </body>
 </html>
+
 
 
 

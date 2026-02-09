@@ -5,235 +5,144 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FantaHandball</title>
 <style>
-body { margin:0; font-family:Arial,sans-serif; background:#0f172a; color:#e5e7eb; display:flex; flex-direction:column; align-items:center; padding-bottom:60px; }
-header { background:#020617; padding:16px; width:100%; text-align:center; font-size:24px; font-weight:bold; }
-.screen { display:none; padding:20px; width:100%; max-width:600px; }
-.active { display:block; }
-.card { background:#1e293b; border-radius:10px; padding:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; }
-.btn { background:#22c55e; color:#022c22; border:none; padding:6px 12px; border-radius:8px; font-weight:bold; cursor:pointer; margin-left:8px; }
-input, select { padding:6px; border-radius:6px; border:none; margin-bottom:8px; }
-nav { display:flex; justify-content:space-around; background:#020617; padding:10px 0; width:100%; position:fixed; bottom:0; max-width:600px; z-index:10; }
-nav button { background:none; border:none; color:#e5e7eb; font-size:14px; cursor:pointer; }
-#closeAstaBtn { margin-top:20px; position:relative; z-index:5; }
+body{margin:0;font-family:Arial;background:#0f172a;color:#e5e7eb;padding-bottom:70px}
+header{background:#020617;padding:16px;text-align:center;font-size:24px;font-weight:bold}
+.screen{display:none;padding:20px;max-width:600px;margin:auto}
+.active{display:block}
+.card{background:#1e293b;border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer}
+.btn{background:#22c55e;color:#022c22;border:none;padding:8px 14px;border-radius:8px;font-weight:bold;cursor:pointer}
+input{width:100%;padding:8px;border-radius:6px;border:none;margin-bottom:10px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#020617;display:flex;justify-content:space-around;padding:10px}
+nav button{background:none;border:none;color:#e5e7eb;font-size:14px}
 </style>
 </head>
 <body>
 <header>FantaHandball</header>
 
 <section id="login" class="screen active">
-  <h2>Benvenuto su FantaHandball</h2>
-  <input id="usernameInput" placeholder="Inserisci il tuo nome" />
-  <input id="leagueInput" placeholder="Nome lega" />
-  <button id="loginBtn" class="btn">Entra</button>
+  <h2>Login</h2>
+  <input id="usernameInput" placeholder="Il tuo nome">
+  <button class="btn" id="loginBtn">Entra</button>
 </section>
 
 <section id="home" class="screen">
   <h2 id="welcome"></h2>
-  <div class="card">
-    <input id="leagueName" placeholder="Nome nuova lega" />
-    <button id="createLeagueBtn" class="btn">Crea Lega</button>
-  </div>
+  <input id="leagueName" placeholder="Nome nuova lega">
+  <button class="btn" id="createLeagueBtn">Crea Lega</button>
   <h3>Leghe disponibili</h3>
   <div id="leagues"></div>
-  <button class="btn" onclick="generateCalendar()">Genera Calendario</button>
-</section>
-
-<section id="svincolati" class="screen">
-  <h2>Mercato Svincolati</h2>
-  <div id="freePlayers"></div>
-  <button class="btn" id="closeAstaBtn">Termina Asta</button>
-</section>
-
-<section id="rosa" class="screen">
-  <h2>Rosa</h2>
-  <div id="players"></div>
-</section>
-
-<section id="calendario" class="screen">
-  <h2>Calendario</h2>
-  <div id="matches"></div>
-</section>
-
-<section id="profilo" class="screen">
-  <h2>Profilo</h2>
-  <div class="card" id="profileName">Username:</div>
-  <button class="btn" onclick="showScreen('home')">Torna Home</button>
 </section>
 
 <nav>
   <button onclick="showScreen('home')">Home</button>
-  <button onclick="showScreen('svincolati')">Mercato</button>
-  <button onclick="showScreen('rosa')">Rosa</button>
-  <button onclick="showScreen('profilo')">Profilo</button>
-  <button onclick="showScreen('calendario')">Calendario</button>
 </nav>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
+// CONFIG FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyCTqPPwpfNElGluzwjv9nsy8EYBzJUXm2M",
+  authDomain: "fantahandaball.firebaseapp.com",
+  projectId: "fantahandaball",
+  storageBucket: "fantahandaball.firebasestorage.app",
+  messagingSenderId: "346312156685",
+  appId: "1:346312156685:web:13cee4784534ad7f95d744"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// VARIABILI GLOBALI
 let username = '';
-let currentLeague = null;
-const leagues = {};
-const users = {};
-const startingCredits = 100;
+let currentLeague = '';
 
-// Lista completa dei giocatori (riempi con tutti quelli precedenti)
-const freeAgents = [
-  { name: "Cristian Falsaperla", role: "Terzino", team: "New Handball Mascalucia", highestBid:0, highestBidder:'' },
-  { name: "Claudio Cariddi", role: "Terzino", team: "Messina", highestBid:0, highestBidder:'' },
-  { name: "Roberto Abbate", role: "Centrale", team: "Messina", highestBid:0, highestBidder:'' },
-  { name: "Davide Arnoud", role: "Portiere", team: "Messina", highestBid:0, highestBidder:'' }
-  // aggiungi tutti gli altri qui
-];
-
+// NAVIGAZIONE
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  if(id==='svincolati') renderFreeAgents();
-  if(id==='rosa') renderUserTeam();
-  if(id==='calendario') renderCalendar();
 }
 
+// LOGIN
 function login() {
   const name = document.getElementById('usernameInput').value.trim();
-  const leagueName = document.getElementById('leagueInput').value.trim();
-  if(!name || !leagueName) return alert('Inserisci nome e lega');
+  if (!name) {
+    alert('Inserisci il nome');
+    return;
+  }
   username = name;
-  if(!users[username]) users[username] = { league: leagueName, team: [], credits: startingCredits };
-  if(!leagues[leagueName]) leagues[leagueName] = { members: [username], players: [], calendar: [] };
-  else if(!leagues[leagueName].members.includes(username)) leagues[leagueName].members.push(username);
-  currentLeague = leagueName;
-  document.getElementById('welcome').innerText = `Ciao ${username}, Lega: ${currentLeague}`;
-  document.getElementById('profileName').innerText = `Username: ${username}`;
+  document.getElementById('welcome').innerText = 'Ciao ' + username;
   showScreen('home');
   renderLeagues();
-  renderUserTeam();
 }
 
-function createLeague() {
-  const name = document.getElementById('leagueName').value.trim();
-  if(!name) return alert('Inserisci il nome della lega');
-  if(leagues[name]) return alert('Lega già esistente');
-  leagues[name] = { members: [username], players: [], calendar: [] };
-  users[username].league = name;
-  currentLeague = name;
+// CREA LEGA (SALVATA SU FIREBASE)
+async function createLeague() {
+  const leagueName = document.getElementById('leagueName').value.trim();
+  if (!leagueName) {
+    alert('Inserisci il nome della lega');
+    return;
+  }
+
+  const ref = db.collection('leagues').doc(leagueName);
+  const snap = await ref.get();
+
+  if (snap.exists) {
+    alert('Questa lega esiste già');
+    return;
+  }
+
+  await ref.set({
+    owner: username,
+    members: [username],
+    createdAt: new Date()
+  });
+
+  currentLeague = leagueName;
   document.getElementById('leagueName').value = '';
-  renderLeagues();
-  alert(`Lega "${name}" creata con successo!`);
+  alert('Lega creata con successo');
 }
 
+// MOSTRA LE LEGHE (IN TEMPO REALE)
 function renderLeagues() {
   const container = document.getElementById('leagues');
-  container.innerHTML = '';
-  for(let name in leagues){
-    const div = document.createElement('div');
-    div.className = 'card';
-    div.innerText = `${name} – ${leagues[name].members.length} membri`;
-    div.onclick = () => joinLeague(name);
-    container.appendChild(div);
-  }
+
+  db.collection('leagues').onSnapshot(snapshot => {
+    container.innerHTML = '';
+    snapshot.forEach(doc => {
+      const league = doc.data();
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.innerText = doc.id + ' - ' + league.members.length + ' squadre';
+      div.onclick = () => joinLeague(doc.id);
+      container.appendChild(div);
+    });
+  });
 }
 
-function joinLeague(name){
-  if(!leagues[name].members.includes(username)) leagues[name].members.push(username);
-  users[username].league = name;
+// ENTRA IN UNA LEGA
+async function joinLeague(name) {
+  const ref = db.collection('leagues').doc(name);
+  const snap = await ref.get();
+  if (!snap.exists) return;
+
+  let members = snap.data().members;
+  if (!members.includes(username)) {
+    members.push(username);
+    await ref.update({ members });
+  }
+
   currentLeague = name;
-  alert(`Sei entrato nella lega: ${name}`);
-  renderLeagues();
-  renderUserTeam();
-  renderFreeAgents();
+  alert('Sei entrato nella lega ' + name);
 }
 
-function renderFreeAgents(){
-  const container = document.getElementById('freePlayers');
-  container.innerHTML = '';
-  freeAgents.forEach((p,i)=>{
-    const div = document.createElement('div');
-    div.className = 'card';
-    div.innerText = `${p.name} – ${p.role} – ${p.team} – Offerta: ${p.highestBid} (${p.highestBidder||'-'})`;
-    const input = document.createElement('input'); input.type='number'; input.min='1'; input.placeholder='Offerta';
-    const btn = document.createElement('button'); btn.className='btn'; btn.innerText='Fai Offerta';
-    btn.onclick = ()=>placeBid(p, parseInt(input.value));
-    div.appendChild(input); div.appendChild(btn);
-    container.appendChild(div);
-  });
-}
-
-function placeBid(player, amount){
-  if(!users[username].league) return alert('Unisciti prima a una lega');
-  if(isNaN(amount) || amount <= player.highestBid) return alert('Offerta troppo bassa');
-  if(amount > users[username].credits) return alert('Non hai abbastanza crediti');
-  player.highestBid = amount;
-  player.highestBidder = username;
-  renderFreeAgents();
-}
-
-function closeAsta(){
-  freeAgents.forEach(p=>{
-    if(p.highestBidder){
-      const winner = p.highestBidder;
-      users[winner].team.push({ ...p, price: p.highestBid });
-      users[winner].credits -= p.highestBid;
-    }
-  });
-  for(let i=freeAgents.length-1;i>=0;i--){
-    if(freeAgents[i].highestBidder) freeAgents.splice(i,1);
-  }
-  renderUserTeam();
-  renderFreeAgents();
-}
-
-function renderUserTeam(){
-  const container = document.getElementById('players');
-  const user = users[username];
-  container.innerHTML = `<p>Crediti disponibili: ${user.credits}</p>`;
-  user.team.forEach((p,i)=>{
-    const div = document.createElement('div');
-    div.className='card';
-    div.innerText = `${i+1}. ${p.name} – ${p.role}`;
-    container.appendChild(div);
-  });
-}
-
-// --- Calendario ---
-function generateCalendar() {
-  if(!currentLeague) return alert('Devi essere in una lega');
-  const league = leagues[currentLeague];
-  const teams = [...league.members];
-  if(teams.length < 2) return alert('Servono almeno 2 squadre per il calendario');
-
-  for (let i = teams.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [teams[i], teams[j]] = [teams[j], teams[i]];
-  }
-
-  const matches = [];
-  for (let i = 0; i < teams.length; i += 2) {
-    if(teams[i+1]) matches.push({ home: teams[i], away: teams[i+1] });
-    else matches.push({ home: teams[i], away: 'Riposo' });
-  }
-
-  league.calendar = matches;
-  renderCalendar();
-  showScreen('calendario');
-}
-
-function renderCalendar(){
-  if(!currentLeague) return;
-  const container = document.getElementById('matches');
-  container.innerHTML = '';
-  const league = leagues[currentLeague];
-  if(!league.calendar) return;
-  league.calendar.forEach((m, idx)=>{
-    const div = document.createElement('div');
-    div.className = 'card';
-    div.innerText = `Giornata ${idx+1}: ${m.home} vs ${m.away}`;
-    container.appendChild(div);
-  });
-}
-
-// Event listeners
+// EVENTI
 document.getElementById('loginBtn').addEventListener('click', login);
 document.getElementById('createLeagueBtn').addEventListener('click', createLeague);
-document.getElementById('closeAstaBtn').addEventListener('click', closeAsta);
 </script>
 </body>
 </html>

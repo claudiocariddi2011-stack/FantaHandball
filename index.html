@@ -1,301 +1,232 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FantaHandball</title>
-<style>
-body { margin:0; font-family:Arial,sans-serif; background:#0f172a; color:#e5e7eb; display:flex; flex-direction:column; align-items:center; padding-bottom:60px; }
-header { background:#020617; padding:16px; width:100%; text-align:center; font-size:24px; font-weight:bold; }
-.screen { display:none; padding:20px; width:100%; max-width:600px; }
-.active { display:block; }
-.card { background:#1e293b; border-radius:10px; padding:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; }
-.btn { background:#22c55e; color:#022c22; border:none; padding:6px 12px; border-radius:8px; font-weight:bold; cursor:pointer; margin-left:8px; }
-input, select { padding:6px; border-radius:6px; border:none; margin-bottom:8px; }
-nav { display:flex; justify-content:space-around; background:#020617; padding:10px 0; width:100%; position:fixed; bottom:0; max-width:600px; z-index:10; }
-nav button { background:none; border:none; color:#e5e7eb; font-size:14px; cursor:pointer; }
-#closeAstaBtn { margin-top:20px; position:relative; z-index:5; }
-</style>
+<!DOCTYPE html><html lang="it"><head>    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Fanta Handball - Pro Live Edition</title>    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@1,700;1,900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">    
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0f172a; --bg-deep: #020617; --accent-orange: #f97316;
+            --accent-dark: #9a3412; --text-white: #f8fafc; --glass: rgba(255, 255, 255, 0.05);
+            --field-blue: #3b82f6; --area-orange: #f97316;
+        }
+        body { margin: 0; padding: 0; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); color: var(--text-white); font-family: 'Roboto', sans-serif; min-height: 100vh; overflow-x: hidden; }
+        
+        /* LOGIN GRAFICO */
+        #login-overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.98); display: flex; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(20px); }
+        .login-box { background: linear-gradient(145deg, #1e293b, #0f172a); padding: 50px; border-radius: 24px; text-align: center; width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 30px 60px rgba(0,0,0,0.8); }
+        .login-box h1 { font-family: 'Exo 2', sans-serif; font-weight: 900; font-style: italic; font-size: 2.2rem; margin-bottom: 30px; background: linear-gradient(to bottom, #fff 50%, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .login-box input { width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 12px; border: none; background: #020617; color: white; outline: none; box-shadow: inset 0 4px 10px rgba(0,0,0,0.5); }
+        .login-box button { width: 100%; padding: 18px; background: var(--accent-orange); border: none; color: white; font-weight: 900; cursor: pointer; border-radius: 12px; box-shadow: 0 6px 0 var(--accent-dark); text-transform: uppercase; transition: 0.1s; }
+        .login-box button:active { transform: translateY(3px); box-shadow: 0 3px 0 var(--accent-dark); }
+
+        /* HEADER E LAYOUT */
+        #site-content { opacity: 0; transition: opacity 1s ease; max-width: 1200px; margin: 0 auto; padding: 40px 20px; display: none; }
+        header h1 { text-align: center; font-family: 'Exo 2', sans-serif; font-weight: 900; font-size: 3.5rem; font-style: italic; margin-bottom: 30px; background: linear-gradient(to bottom, #fff 50%, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); }
+        
+        .dashboard-grid { display: grid; grid-template-columns: 260px 1fr; gap: 40px; }
+        .sidebar { background: rgba(30, 41, 59, 0.8); border-radius: 20px; overflow: hidden; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); height: fit-content; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .nav-item { padding: 20px 25px; font-weight: bold; cursor: pointer; color: rgba(248, 250, 252, 0.6); border-bottom: 1px solid rgba(255,255,255,0.03); transition: 0.3s; }
+        .nav-item.active { background: var(--accent-orange); color: white; box-shadow: inset 5px 0 0 white; }
+        
+        .content-section { display: none; animation: fadeInUp 0.5s ease forwards; }
+        .content-section.active { display: block; }
+
+        /* CARDS E MERCATO */
+        .search-bar { width: 100%; padding: 15px 20px; border-radius: 12px; border: 1px solid rgba(249, 115, 22, 0.3); background: #0f172a; color: white; margin-bottom: 25px; box-sizing: border-box; outline: none; }
+        .player-card { background: var(--glass); padding: 15px 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 12px; transition: 0.3s; }
+        .player-card:hover { border-color: var(--accent-orange); background: rgba(255,255,255,0.08); transform: translateX(5px); }
+        .bid-info { font-size: 0.85rem; color: var(--accent-orange); margin-top: 5px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .bid-controls { display: flex; gap: 10px; align-items: center; }
+        .bid-input { width: 60px; padding: 10px; border-radius: 8px; background: #020617; color: white; border: none; text-align: center; font-weight: bold; }
+        .bid-btn { background: #22c55e; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 0 #166534; text-transform: uppercase; font-size: 0.75rem; }
+
+        /* CAMPO DA GIOCO */
+        .handball-field { width: 100%; max-width: 500px; height: 350px; background-color: var(--field-blue); margin: 20px auto; border: 4px solid #fff; border-radius: 10px; position: relative; overflow: hidden; background-image: radial-gradient(circle at 50% 100%, var(--area-orange) 110px, transparent 111px); box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
+        .player-slot { position: absolute; width: 55px; height: 65px; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255,255,255,0.4); clip-path: polygon(0% 0%, 100% 0%, 100% 85%, 50% 100%, 0% 85%); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 900; color: #94a3b8; text-align: center; }
+        .pos-po { bottom: 15px; left: 45%; } .pos-as { top: 140px; left: 5%; } .pos-ts { top: 75px; left: 18%; } .pos-ce { top: 45px; left: 45%; } .pos-td { top: 75px; right: 18%; } .pos-ad { top: 140px; right: 5%; } .pos-pi { top: 115px; left: 45%; }
+        
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
 <body>
-<header>FantaHandball</header>
 
-<section id="login" class="screen active">
-  <h2>Benvenuto su FantaHandball</h2>
-  <input id="usernameInput" placeholder="Inserisci il tuo nome" />
-  <input id="leagueInput" placeholder="Nome lega" />
-  <button id="loginBtn" class="btn">Entra</button>
-</section>
+    <div id="login-overlay">
+        <div class="login-box">
+            <h1>FANTA HANDBALL</h1>
+            <input type="text" id="username" placeholder="Inserisci il tuo Nome">
+            <input type="text" id="league-input" placeholder="Codice Stanza Asta">
+            <button onclick="enterSite()">SCENDI IN CAMPO</button>
+        </div>
+    </div>
 
-<section id="home" class="screen">
-  <h2 id="welcome"></h2>
-  <div class="card">
-    <input id="leagueName" placeholder="Nome nuova lega" />
-    <button id="createLeagueBtn" class="btn">Crea Lega</button>
-  </div>
-  <h3>Leghe disponibili</h3>
-  <div id="leagues"></div>
-  <button class="btn" onclick="generateCalendar()">Genera Calendario</button>
-</section>
+    <div id="site-content">
+        <header><h1>FANTA HANDBALL</h1></header>
+        <main class="dashboard-grid">
+            <nav class="sidebar">
+                <div class="nav-item active" onclick="showSection('home', this)">DASHBOARD</div>
+                <div class="nav-item" onclick="showSection('mercato', this)">MERCATO LIVE</div>
+                <div class="nav-item" onclick="showSection('rosa', this)">IL TUO CAMPO</div>
+            </nav>
 
-<section id="svincolati" class="screen">
-  <h2>Mercato Svincolati</h2>
-  <div id="freePlayers"></div>
-  <button class="btn" id="closeAstaBtn">Termina Asta</button>
-</section>
+            <section id="home" class="content-section active">
+                <h2 id="user-greeting" style="font-family:'Exo 2';">Bentornato!</h2>
+                <div style="background: linear-gradient(135deg, var(--accent-orange), #ea580c); padding: 35px; border-radius: 24px; box-shadow: 0 20px 40px rgba(249, 115, 22, 0.2);">
+                    <span style="opacity: 0.8; font-weight: bold; text-transform: uppercase; font-size: 0.75rem;">Budget Disponibile</span><br>
+                    <b id="budget-display" style="font-size: 3.5rem;">100</b> <small>CRITTI</small>
+                </div>
+                <p style="margin-top: 30px; color: #64748b; font-style: italic;">* I dati di questa sessione verranno eliminati alla chiusura della pagina.</p>
+            </section>
 
-<section id="rosa" class="screen">
-  <h2>Rosa</h2>
-  <div id="players"></div>
-</section>
+            <section id="mercato" class="content-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2 style="font-family:'Exo 2'; margin: 0;">ASTA LIVE</h2>
+                    <div>
+                        <button id="start-btn" class="bid-btn" style="background:#22c55e" onclick="updateAuctionStatus(true)">APRI ASTA</button>
+                        <button id="stop-btn" class="bid-btn" style="background:#ef4444; display:none" onclick="finalizeAuction()">CHIUDI ASTA</button>
+                    </div>
+                </div>
+                <input type="text" id="player-search" class="search-bar" placeholder="Cerca il campione da comprare..." onkeyup="renderMarket()">
+                <div id="market-players"></div>
+            </section>
 
-<section id="calendario" class="screen">
-  <h2>Calendario</h2>
-  <div id="matches"></div>
-</section>
+            <section id="rosa" class="content-section">
+                <h2 style="font-family:'Exo 2'">LA TUA SQUADRA</h2>
+                <div class="handball-field">
+                    <div class="player-slot pos-po">PO</div>
+                    <div class="player-slot pos-as">AS</div>
+                    <div class="player-slot pos-ts">TS</div>
+                    <div class="player-slot pos-ce">CE</div>
+                    <div class="player-slot pos-td">TD</div>
+                    <div class="player-slot pos-ad">AD</div>
+                    <div class="player-slot pos-pi">PI</div>
+                </div>
+                <div id="my-rosa-list" style="margin-top:20px;"></div>
+            </section>
+        </main>
+    </div>
 
-<section id="profilo" class="screen">
-  <h2>Profilo</h2>
-  <div class="card" id="profileName">Username:</div>
-  <button class="btn" onclick="showScreen('home')">Torna Home</button>
-</section>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTqPPwpfNElGluzwjv9nsy8EYBzJUXm2M",
+            authDomain: "fantahandaball.firebaseapp.com",
+            projectId: "fantahandaball",
+            storageBucket: "fantahandaball.firebasestorage.app",
+            messagingSenderId: "346312156685",
+            appId: "1:346312156685:web:13cee4784534ad7f95d744"
+        };
 
-<nav>
-  <button onclick="showScreen('home')">Home</button>
-  <button onclick="showScreen('svincolati')">Mercato</button>
-  <button onclick="showScreen('rosa')">Rosa</button>
-  <button onclick="showScreen('profilo')">Profilo</button>
-  <button onclick="showScreen('calendario')">Calendario</button>
-</nav>
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-<!-- FIREBASE -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+        let userName = "", currentRoom = "", budget = 100, auctionActive = false;
+        let currentBids = {}, myTeam = [], soldPlayers = [];
 
-<script>
-// ================= FIREBASE CONFIG =================
-const firebaseConfig = {
-  apiKey: "AIzaSyCTqPPwpfNElGluzwjv9nsy8EYBzJUXm2M",
-  authDomain: "fantahandaball.firebaseapp.com",
-  projectId: "fantahandaball",
-  storageBucket: "fantahandaball.firebasestorage.app",
-  messagingSenderId: "346312156685",
-  appId: "1:346312156685:web:13cee4784534ad7f95d744"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+        const playersList = [
+            { id: 1, name: "Cristian Falsaperla", team: "New Handball", role: "TER" },
+            { id: 2, name: "Claudio Cariddi", team: "Messina", role: "TER" },
+            { id: 3, name: "Yuri Sigona", team: "Modica", role: "TER" },
+            { id: 4, name: "Andrè Pagano", team: "Th Mascalucia", role: "TER" },
+            { id: 5, name: "Leonardo Livoli", team: "Albatro", role: "TER" },
+            { id: 6, name: "Pasquale Caruso", team: "Avola", role: "TER" },
+            { id: 7, name: "Francesco Rendo", team: "Modica", role: "TER" },
+            { id: 8, name: "Leonardo Mineo", team: "TH", role: "TER" },
+            { id: 9, name: "Federico De Vita", team: "Svincolato", role: "TER" },
+            { id: 10, name: "Paolo Grioli", team: "Messina", role: "TER" }
+        ];
 
-// ================= STATO =================
-let username = '';
-let currentLeague = null;
-const startingCredits = 100;
+        function enterSite() {
+            userName = document.getElementById('username').value.trim();
+            currentRoom = document.getElementById('league-input').value.trim();
+            if(!userName || !currentRoom) return alert("Compila i campi!");
 
-// Lista dei giocatori svincolati
-const freeAgents = [
-  { name: "Cristian Falsaperla", role: "Terzino", team: "New Handball Mascalucia", highestBid:0, highestBidder:'' },
-  { name: "Claudio Cariddi", role: "Terzino", team: "Messina", highestBid:0, highestBidder:'' },
-  { name: "Roberto Abbate", role: "Centrale", team: "Messina", highestBid:0, highestBidder:'' },
-  { name: "Davide Arnoud", role: "Portiere", team: "Messina", highestBid:0, highestBidder:'' }
-  // aggiungi tutti gli altri qui
-];
+            document.getElementById('login-overlay').style.display = "none";
+            document.getElementById('site-content').style.display = "block";
+            setTimeout(() => document.getElementById('site-content').style.opacity = "1", 50);
 
-// ================= FUNZIONI =================
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if(id==='svincolati') renderFreeAgents();
-  if(id==='rosa') renderUserTeam();
-  if(id==='calendario') renderCalendar();
-}
+            const userRef = db.ref('rooms/' + currentRoom + '/users/' + userName);
+            userRef.onDisconnect().remove(); // Pulisce al logout/chiusura
 
-// LOGIN
-function login() {
-  const name = document.getElementById('usernameInput').value.trim();
-  const leagueName = document.getElementById('leagueInput').value.trim();
-  if(!name || !leagueName) return alert('Inserisci nome e lega');
-  username = name;
+            db.ref('rooms/' + currentRoom).on('value', (snapshot) => {
+                const data = snapshot.val() || {};
+                auctionActive = data.auctionActive || false;
+                currentBids = data.bids || {};
+                soldPlayers = data.soldPlayers || [];
+                
+                if(data.users && data.users[userName]) {
+                    budget = data.users[userName].budget;
+                    myTeam = data.users[userName].team || [];
+                    document.getElementById('budget-display').innerText = budget;
+                } else {
+                    userRef.set({ budget: 100, team: [] });
+                }
+                
+                updateUI();
+                renderMarket();
+                renderRosa();
+            });
+        }
 
-  const userRef = db.collection('users').doc(username);
-  const leagueRef = db.collection('leagues').doc(leagueName);
+        function renderMarket() {
+            const container = document.getElementById('market-players');
+            const term = document.getElementById('player-search').value.toLowerCase();
+            container.innerHTML = "";
 
-  userRef.set({ username, league: leagueName, credits: startingCredits }, { merge:true });
-  leagueRef.get().then(doc=>{
-    if(doc.exists){
-      // Aggiungi membro se non presente
-      const members = doc.data().members || [];
-      if(!members.includes(username)) members.push(username);
-      leagueRef.update({ members });
-    } else {
-      leagueRef.set({ members:[username], calendar:[], createdAt:new Date() });
-    }
-    currentLeague = leagueName;
-    document.getElementById('welcome').innerText = `Ciao ${username}, Lega: ${currentLeague}`;
-    document.getElementById('profileName').innerText = `Username: ${username}`;
-    showScreen('home');
-    renderLeagues();
-    renderUserTeam();
-  });
-}
+            playersList.filter(p => !soldPlayers.includes(p.id) && p.name.toLowerCase().includes(term)).forEach(p => {
+                const bid = currentBids[p.id];
+                container.innerHTML += `
+                    <div class="player-card">
+                        <div><b>${p.name}</b><br>${bid ? `<span class="bid-info">🔥 ${bid.amount} cr (${bid.user})</span>` : ''}</div>
+                        <div class="bid-controls">
+                            <input type="number" id="bid-${p.id}" class="bid-input" value="${bid ? bid.amount + 1 : 1}">
+                            <button class="bid-btn" onclick="placeBid(${p.id})">OFFRI</button>
+                        </div>
+                    </div>`;
+            });
+        }
 
-// CREA LEGA
-function createLeague() {
-  const name = document.getElementById('leagueName').value.trim();
-  if(!name) return alert('Inserisci il nome della lega');
-  const leagueRef = db.collection('leagues').doc(name);
-  leagueRef.get().then(doc=>{
-    if(doc.exists) return alert('Lega già esistente');
-    leagueRef.set({ members:[username], calendar:[], createdAt:new Date() });
-    db.collection('users').doc(username).update({ league:name });
-    currentLeague = name;
-    document.getElementById('leagueName').value='';
-    renderLeagues();
-    alert(`Lega "${name}" creata con successo!`);
-  });
-}
+        function placeBid(id) {
+            if(!auctionActive) return alert("Asta chiusa!");
+            const val = parseInt(document.getElementById('bid-'+id).value);
+            if(val > budget) return alert("Budget superato!");
+            db.ref('rooms/'+currentRoom+'/bids/'+id).set({ amount: val, user: userName });
+        }
 
-// RENDER LEAGUES
-function renderLeagues() {
-  const container = document.getElementById('leagues');
-  container.innerHTML = '';
-  db.collection('leagues').orderBy('createdAt','desc').get().then(snap=>{
-    snap.forEach(doc=>{
-      const l = doc.data();
-      const div = document.createElement('div');
-      div.className='card';
-      div.innerText = `${doc.id} – ${l.members.length} membri`;
-      div.onclick = ()=>joinLeague(doc.id);
-      container.appendChild(div);
-    });
-  });
-}
+        function updateAuctionStatus(status) {
+            db.ref('rooms/'+currentRoom+'/auctionActive').set(status);
+        }
 
-// JOIN LEAGUE
-function joinLeague(name){
-  const leagueRef = db.collection('leagues').doc(name);
-  leagueRef.get().then(doc=>{
-    if(doc.exists){
-      const members = doc.data().members || [];
-      if(!members.includes(username)) members.push(username);
-      leagueRef.update({ members });
-      db.collection('users').doc(username).update({ league:name });
-      currentLeague = name;
-      alert(`Sei entrato nella lega: ${name}`);
-      renderLeagues();
-      renderUserTeam();
-      renderFreeAgents();
-    }
-  });
-}
+        function finalizeAuction() {
+            for(let id in currentBids) {
+                const bid = currentBids[id];
+                if(bid.user === userName) {
+                    budget -= bid.amount;
+                    myTeam.push(playersList.find(p => p.id == id));
+                }
+                db.ref('rooms/'+currentRoom+'/soldPlayers').transaction(c => (c || []).concat([parseInt(id)]));
+            }
+            db.ref('rooms/'+currentRoom+'/users/'+userName).update({ budget: budget, team: myTeam });
+            db.ref('rooms/'+currentRoom+'/bids').remove();
+            updateAuctionStatus(false);
+        }
 
-// RENDER FREE AGENTS
-function renderFreeAgents(){
-  const container = document.getElementById('freePlayers');
-  container.innerHTML = '';
-  freeAgents.forEach((p,i)=>{
-    const div = document.createElement('div');
-    div.className='card';
-    div.innerText = `${p.name} – ${p.role} – ${p.team} – Offerta: ${p.highestBid} (${p.highestBidder||'-'})`;
-    const input = document.createElement('input'); input.type='number'; input.min='1'; input.placeholder='Offerta';
-    const btn = document.createElement('button'); btn.className='btn'; btn.innerText='Fai Offerta';
-    btn.onclick = ()=>placeBid(p, parseInt(input.value));
-    div.appendChild(input); div.appendChild(btn);
-    container.appendChild(div);
-  });
-}
+        function updateUI() {
+            document.getElementById('start-btn').style.display = auctionActive ? "none" : "inline-block";
+            document.getElementById('stop-btn').style.display = auctionActive ? "inline-block" : "none";
+            document.getElementById('user-greeting').innerText = "Ciao, " + userName + "!";
+        }
 
-function placeBid(player, amount){
-  if(!currentLeague) return alert('Unisciti prima a una lega');
-  db.collection('users').doc(username).get().then(doc=>{
-    const user = doc.data();
-    if(isNaN(amount) || amount <= player.highestBid) return alert('Offerta troppo bassa');
-    if(amount > user.credits) return alert('Non hai abbastanza crediti');
-    player.highestBid = amount;
-    player.highestBidder = username;
-    renderFreeAgents();
-  });
-}
+        function renderRosa() {
+            const container = document.getElementById('my-rosa-list');
+            container.innerHTML = "";
+            myTeam.forEach(p => { container.innerHTML += `<div class="player-card"><b>${p.name}</b></div>`; });
+        }
 
-// CLOSE ASTA
-function closeAsta(){
-  freeAgents.forEach(p=>{
-    if(p.highestBidder){
-      db.collection('users').doc(p.highestBidder).get().then(doc=>{
-        const data = doc.data();
-        const newTeam = data.team || [];
-        newTeam.push({ ...p, price:p.highestBid });
-        const newCredits = data.credits - p.highestBid;
-        db.collection('users').doc(p.highestBidder).update({ team:newTeam, credits:newCredits });
-      });
-    }
-  });
-  for(let i=freeAgents.length-1;i>=0;i--){
-    if(freeAgents[i].highestBidder) freeAgents.splice(i,1);
-  }
-  renderUserTeam();
-  renderFreeAgents();
-}
-
-// RENDER ROSA
-function renderUserTeam(){
-  const container = document.getElementById('players');
-  db.collection('users').doc(username).get().then(doc=>{
-    const data = doc.data();
-    container.innerHTML = `<p>Crediti disponibili: ${data.credits}</p>`;
-    const team = data.team || [];
-    team.forEach((p,i)=>{
-      const div = document.createElement('div');
-      div.className='card';
-      div.innerText = `${i+1}. ${p.name} – ${p.role}`;
-      container.appendChild(div);
-    });
-  });
-}
-
-// CALENDARIO
-function generateCalendar() {
-  if(!currentLeague) return alert('Devi essere in una lega');
-  const leagueRef = db.collection('leagues').doc(currentLeague);
-  leagueRef.get().then(doc=>{
-    const league = doc.data();
-    const teams = [...league.members];
-    if(teams.length < 2) return alert('Servono almeno 2 squadre per il calendario');
-    for (let i = teams.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [teams[i], teams[j]] = [teams[j], teams[i]];
-    }
-    const matches = [];
-    for (let i = 0; i < teams.length; i += 2) {
-      if(teams[i+1]) matches.push({ home: teams[i], away: teams[i+1] });
-      else matches.push({ home: teams[i], away: 'Riposo' });
-    }
-    leagueRef.update({ calendar: matches });
-    renderCalendar();
-    showScreen('calendario');
-  });
-}
-
-function renderCalendar(){
-  if(!currentLeague) return;
-  const container = document.getElementById('matches');
-  db.collection('leagues').doc(currentLeague).get().then(doc=>{
-    const league = doc.data();
-    if(!league.calendar) return;
-    container.innerHTML = '';
-    league.calendar.forEach((m, idx)=>{
-      const div = document.createElement('div');
-      div.className='card';
-      div.innerText = `Giornata ${idx+1}: ${m.home} vs ${m.away}`;
-      container.appendChild(div);
-    });
-  });
-}
-
-// EVENT LISTENERS
-document.getElementById('loginBtn').addEventListener('click', login);
-document.getElementById('createLeagueBtn').addEventListener('click', createLeague);
-document.getElementById('closeAstaBtn').addEventListener('click', closeAsta);
-</script>
-</body>
-</html>
+        function showSection(id, el) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+        }
+    </script>
+</body></html>
 
 

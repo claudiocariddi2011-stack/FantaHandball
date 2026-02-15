@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="it"><head>    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Fanta Handball - Pro Edition</title>    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@1,700;1,900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">    
+<!DOCTYPE html><html lang="it"><head>    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Fanta Handball - Pro Edition</title>    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@1,700;1,900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">        
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
@@ -250,7 +250,8 @@
         // --- CONFIGURAZIONE FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyCTqPPwpfNElGluzwjv9nsy8EYBzJUXm2M",
-            databaseURL: "https://fantahandaball-default-rtdb.firebaseio.com/", 
+            // Ho cambiato l'URL con quello completo che Firebase solitamente si aspetta per il Realtime DB
+            databaseURL: "https://fantahandaball-default-rtdb.europe-west1.firebasedatabase.app/", 
             authDomain: "fantahandaball.firebaseapp.com",
             projectId: "fantahandaball",
             storageBucket: "fantahandaball.firebasestorage.app",
@@ -261,7 +262,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- VARIABILI DI GIOCO ---
         let budget = 100;
         let auctionActive = false;
         let currentBids = {};
@@ -311,7 +311,6 @@
             document.getElementById('league-name-display').innerText = currentLeague;
             document.getElementById('league-list').innerHTML = `<div class="league-card"><div><h3 style="margin:0">${currentLeague}</h3><p style="margin:5px 0 0 0">Admin: ${userName} • Membri: 1/7 • Stato: Attiva</p></div><button class="btn-entra">ENTRA</button></div>`;
             
-            // Inizializza ascolto dati online
             db.ref('leagues/' + currentLeague).on('value', (snapshot) => {
                 const data = snapshot.val() || {};
                 auctionActive = data.auctionActive || false;
@@ -355,7 +354,6 @@
         }
 
         function closeAuction() {
-            // Logica locale per pulire l'interfaccia dopo la chiusura
             for (let id in currentBids) {
                 const pIdx = players.findIndex(p => p.id == id);
                 if (pIdx > -1) {

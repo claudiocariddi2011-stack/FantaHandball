@@ -1,4 +1,11 @@
-<!DOCTYPE html><html lang="it"><head>    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Fanta Handball - Pro Edition</title>    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@1,700;1,900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">        
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fanta Handball Pro - Live Auction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@1,700;1,900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
@@ -11,8 +18,6 @@
             --accent-dark: #9a3412;
             --text-white: #f8fafc;
             --glass: rgba(255, 255, 255, 0.05);
-            --player-blue: #334155;
-             /* Nuovi colori campo */
             --field-blue: #3b82f6;
             --area-orange: #f97316;
         }
@@ -21,254 +26,160 @@
             background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
             color: var(--text-white);
             font-family: 'Roboto', sans-serif;
-            overflow-x: hidden;
             min-height: 100vh;
         }
-        /* --- LOGIN 3D --- */
+
+        /* --- LOGIN --- */
         #login-overlay {
             position: fixed; inset: 0;
             background: rgba(2, 6, 23, 0.98);
             display: flex; justify-content: center; align-items: center;
-            z-index: 9999; backdrop-filter: blur(20px); perspective: 1200px;
+            z-index: 9999; backdrop-filter: blur(20px);
         }
         .login-box {
             background: linear-gradient(145deg, #1e293b, #0f172a);
-            padding: 50px; border-radius: 24px; text-align: center;
-            width: 90%; max-width: 400px; transform: rotateX(10deg);
-            box-shadow: 0 10px 0 #000, 0 30px 60px rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.05);
+            padding: 40px; border-radius: 24px; text-align: center;
+            width: 90%; max-width: 400px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .login-box h1 {
-            font-family: 'Exo 2', sans-serif;
-            font-weight: 900;
-            font-style: italic;
-            font-size: 2.5rem;
-            text-transform: uppercase;
-            margin-bottom: 30px;
-            background: linear-gradient(to bottom, #fff 50%, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
-        }
-        .login-box input {
-            width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 12px;
-            border: none; background: #020617; color: white; outline: none;
-            box-shadow: inset 0 4px 10px rgba(0,0,0,0.7);
-        }
-        .login-box button {
-            width: 100%; padding: 18px; background: var(--accent-orange);
-            border: none; color: white; font-weight: 900; cursor: pointer;
-            border-radius: 12px; text-transform: uppercase;
-            box-shadow: 0 6px 0 var(--accent-dark);
-        }
-        /* --- SITO PRINCIPALE --- */
-        #site-content { opacity: 0; transition: opacity 1s ease; max-width: 1200px; margin: 0 auto; padding: 60px 20px; display: none; }
-        header { width: 100%; text-align: center; margin-bottom: 50px; }
-        header h1 {
-            display: inline-block; font-family: 'Exo 2', sans-serif; font-weight: 900;
-            font-style: italic; font-size: 5rem; text-transform: uppercase; margin: 0;
-            background: linear-gradient(to bottom, #fff 50%, #94a3b8);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
-        }
-        .dashboard-grid { display: grid; grid-template-columns: 260px 1fr; gap: 40px; margin-top: 20px; }
-        .sidebar {
-            background: linear-gradient(160deg, rgba(30, 41, 59, 0.8) 0%, rgba(2, 6, 23, 0.6) 100%);
-            border-radius: 20px; overflow: hidden; backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.08); height: fit-content;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-        }
-        .nav-item {
-            padding: 20px 25px; font-weight: bold; cursor: pointer;
-            color: rgba(248, 250, 252, 0.6); border-bottom: 1px solid rgba(255,255,255,0.03);
-            display: flex; justify-content: space-between;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .nav-item:hover { color: #fff; padding-left: 35px; background: rgba(249, 115, 22, 0.1); box-shadow: inset 5px 0 0 var(--accent-orange); }
-        .nav-item.active { background: linear-gradient(90deg, var(--accent-orange) 0%, #ea580c 100%); color: white; }
-        .content-section { display: none; animation: fadeInUp 0.8s ease forwards; }
-        .content-section.active { display: block; }
-        .btn-entra {
-             background: var(--accent-orange); color: white; border: none; padding: 10px 20px;
-             border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase;
-            box-shadow: 0 4px 0 var(--accent-dark); transition: 0.1s;
-        }
-        .btn-entra:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--accent-dark); }
-        /* --- HOME --- */
-        .quote { font-style: italic; color: var(--accent-orange); font-size: 1.2rem; margin: 20px 0; display: block; border-left: 4px solid var(--accent-orange); padding-left: 15px; }
-        .stats-mini-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 40px; max-width: 600px; }
-        .mini-card {
-             background: rgba(255, 255, 255, 0.03); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);
-             text-align: center; transition: 0.3s ease;
-        }
-        .mini-card:hover { transform: translateY(-5px); border-color: var(--accent-orange); background: rgba(249, 115, 22, 0.05); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .mini-card b { font-size: 1.8rem; color: var(--accent-orange); font-family: 'Exo 2', sans-serif; display: block; }
-        /* --- LEGHE BOX --- */
-        .league-card {
+        .login-box h1 { font-family: 'Exo 2'; font-weight: 900; font-style: italic; font-size: 2.2rem; color: var(--accent-orange); margin-bottom: 20px; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: none; background: #020617; color: white; box-sizing: border-box; }
+        .login-box button { width: 100%; padding: 15px; background: var(--accent-orange); border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; }
+
+        /* --- DASHBOARD --- */
+        #site-content { display: none; max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        header h1 { font-family: 'Exo 2'; font-style: italic; text-align: center; font-size: 3rem; margin-bottom: 40px; }
+        
+        .dashboard-grid { display: grid; grid-template-columns: 240px 1fr; gap: 30px; }
+        .sidebar { background: var(--glass); border-radius: 15px; overflow: hidden; height: fit-content; border: 1px solid rgba(255,255,255,0.1); }
+        .nav-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .nav-item:hover, .nav-item.active { background: var(--accent-orange); color: white; }
+
+        .content-section { display: none; }
+        .content-section.active { display: block; animation: fadeIn 0.5s; }
+
+        /* --- MERCATO & CARDS --- */
+        .league-card, .player-card {
             background: var(--glass); border: 1px solid rgba(255,255,255,0.1);
-            padding: 12px 25px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center;
-            transition: 0.3s ease; margin-bottom: 15px;
-            width: 550px;
-            min-height: 80px;
-        }
-        .league-card:hover {
-             border-color: var(--accent-orange);
-             background: rgba(255,255,255,0.08);
-             box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
-         }
-        /* --- MERCATO E RICERCA --- */
-        .search-container { margin-top: 15px; }
-        .search-bar {
-            width: 100%; padding: 12px 20px; border-radius: 10px; border: 1px solid rgba(249, 115, 22, 0.3);
-            background: #0f172a; color: white; font-size: 1rem; outline: none; transition: 0.3s; box-sizing: border-box;
-        }
-        .search-bar:focus { border-color: var(--accent-orange); box-shadow: 0 0 15px rgba(249, 115, 22, 0.2); }
-        .market-header { color: var(--accent-orange); border-bottom: 2px solid var(--accent-orange); padding-bottom: 10px; margin: 30px 0 20px; text-transform: uppercase; font-family: 'Exo 2'; }
-        .category-header {
-            background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%);
-            padding: 15px 20px; border-radius: 10px; margin-top: 10px;
-            cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid rgba(249, 115, 22, 0.4); transition: 0.3s;
-            font-family: 'Exo 2'; font-weight: 900; color: var(--accent-orange);
-            user-select: none;
-        }
-        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; }
-        .category-content.active { max-height: 2000px; }
-        .market-inner { padding-top: 15px; }
-        .player-card {
-            background: var(--glass); padding: 15px 20px; border-radius: 12px;
+            padding: 15px; border-radius: 12px; margin-bottom: 10px;
             display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px; transition: 0.3s ease;
         }
-        .player-card:hover { border-color: var(--accent-orange); background: rgba(255,255,255,0.1); transform: translateX(5px); }
-        .bid-info { font-size: 0.85rem; color: var(--accent-orange); margin-top: 5px; font-weight: bold; }
-        .bid-controls { display: flex; gap: 8px; align-items: center; }
-        .bid-input { width: 55px; padding: 8px; border-radius: 6px; border: none; background: #020617; color: white; text-align: center; }
-        .bid-btn { background: #22c55e; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.8rem; box-shadow: 0 4px 0 #166534; }
+        .bid-info { color: var(--accent-orange); font-weight: bold; font-size: 0.9rem; margin-top: 4px; }
+        .bid-controls { display: flex; gap: 10px; }
+        .bid-input { width: 60px; background: #000; color: #fff; border: 1px solid var(--accent-orange); border-radius: 5px; text-align: center; }
+
         /* --- CAMPO --- */
         .handball-field {
-            width: 100%; max-width: 500px; height: 350px;
-             background-color: var(--field-blue);
-             margin: 20px auto;
-            border: 4px solid #fff; border-radius: 5px; position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            overflow: hidden;
-            background-image:
-                  radial-gradient(circle at 50% 100%, var(--area-orange) 100px, transparent 101px); /* Area Porta */
-            background-size: 100% 100%;
-            background-position: bottom;
-            background-repeat: no-repeat;
-        }
-        .handball-field::after {
-            content: ''; position: absolute; bottom: -10px; left: 50%;
-            width: 260px; height: 130px; border: 2px dashed rgba(255,255,255,0.8);
-            border-radius: 130px 130px 0 0; transform: translateX(-50%);
-            pointer-events: none;
+            width: 100%; max-width: 450px; height: 320px; background: var(--field-blue);
+            margin: 20px auto; border: 3px solid #fff; border-radius: 10px; position: relative;
+            background-image: radial-gradient(circle at 50% 100%, var(--area-orange) 90px, transparent 91px);
         }
         .player-slot {
-            position: absolute; width: 55px; height: 65px;
-             background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255,255,255,0.3);
-            clip-path: polygon(0% 0%, 100% 0%, 100% 85%, 50% 100%, 0% 85%);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.65rem; font-weight: 900; cursor: pointer; color: #94a3b8;
-            transition: all 0.2s ease; text-align: center; padding: 0 4px 5px 4px;
-             z-index: 10;
+            position: absolute; width: 50px; height: 50px; background: rgba(0,0,0,0.6);
+            border: 2px solid #fff; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 0.7rem; font-weight: bold; cursor: pointer;
         }
-        .player-slot:hover { transform: scale(1.1) translateY(-2px); border-color: #fff; box-shadow: 0 0 20px rgba(255,255,255,0.6); z-index: 20; }
-        .player-slot.occupied { background: linear-gradient(135deg, #475569 0%, #1e293b 100%); color: #f8fafc; border: 1px solid #cbd5e1; }
-        .pos-po { bottom: 10px; left: 45%; } .pos-as { top: 140px; left: 5%; } .pos-ts { top: 70px; left: 18%; } .pos-ce { top: 40px; left: 45%; } .pos-td { top: 70px; right: 18%; } .pos-ad { top: 140px; right: 5%; } .pos-pi { top: 110px; left: 45%; }
-        .btn-add-3d { background: #22c55e; color: white; border: none; width: 32px; height: 32px; border-radius: 8px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 0 #166534; }
-        .rosa-item { background: rgba(249, 115, 22, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--accent-orange); display: flex; justify-content: space-between; align-items: center; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    </style></head><body>
+        .player-slot.occupied { background: var(--accent-orange); border-color: #fff; }
+
+        /* Posizioni Slot */
+        .pos-po { bottom: 10px; left: 44%; } .pos-as { top: 130px; left: 5%; }
+        .pos-ts { top: 60px; left: 20%; }  .pos-ce { top: 30px; left: 44%; }
+        .pos-td { top: 60px; right: 20%; } .pos-ad { top: 130px; right: 5%; }
+        .pos-pi { top: 100px; left: 44%; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            header h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
     <div id="login-overlay">
         <div class="login-box">
             <h1>FANTA HANDBALL</h1>
-            <h2 style="font-family:'Exo 2'; color:var(--accent-orange); margin-top: 0;">BENVENUTO</h2>
-            <input type="text" id="username" placeholder="Tuo Nome">
-            <input type="text" id="league-input" placeholder="Nome Lega">
-            <button onclick="enterSite()">SCENDI IN CAMPO</button>
+            <input type="text" id="username" placeholder="Tuo Nome (es. Luca)">
+            <input type="text" id="league-input" placeholder="Nome Lega (es. Serie A)">
+            <button onclick="enterSite()">ENTRA NELLA LEGA</button>
         </div>
     </div>
+
     <div id="site-content">
         <header><h1>FANTA HANDBALL</h1></header>
-        <main class="dashboard-grid">
+        
+        <div class="dashboard-grid">
             <nav class="sidebar">
-                <div class="nav-item active" onclick="showSection('home', this)">HOME <span>⬢</span></div>
-                <div class="nav-item" onclick="showSection('leghe', this)">LEGHE <span>⊕</span></div>
-                <div class="nav-item" onclick="showSection('mercato', this)">MERCATO <span>⊕</span></div>
-                <div class="nav-item" onclick="showSection('rosa', this)">ROSA <span>⊕</span></div>
+                <div class="nav-item active" onclick="showSection('home', this)">HOME</div>
+                <div class="nav-item" onclick="showSection('leghe', this)">LISTA LEGHE</div>
+                <div class="nav-item" onclick="showSection('mercato', this)">MERCATO LIVE</div>
+                <div class="nav-item" onclick="showSection('rosa', this)">MIA ROSA</div>
             </nav>
-            <section id="home" class="content-section active">
-                <h2 id="user-greeting" style="font-family:'Exo 2'; font-size: 2.8rem; margin:0;">Ciao!</h2>
-                <span class="quote">"Dove il cuore batte e la palla vola, nasce la leggenda."</span>
-                <p>Lega attiva: <b id="league-name-display" style="color:white"></b></p>
-                <div class="stats-mini-grid">
-                    <div class="mini-card"><span>Membri</span><b>1 / 7</b></div>
-                    <div class="mini-card"><span>Budget Residuo</span><b id="budget-display">100</b></div>
-                </div>
-            </section>
-            <section id="leghe" class="content-section">
-                <h2 style="font-family:'Exo 2'; margin-bottom: 30px;">LEGHE DISPONIBILI</h2>
-                <div id="league-list"></div>
-            </section>
-            <section id="mercato" class="content-section">
-                <h2 style="font-family:'Exo 2';">ASTA SVINCOLATI</h2>
-                
-                <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-                    <button id="start-btn" class="btn-entra" style="background: #22c55e; box-shadow: 0 4px 0 #166534;" onclick="toggleAuction(true)">INIZIA ASTA</button>
-                    <button id="stop-btn" class="btn-entra" style="display:none; background: #ef4444; box-shadow: 0 4px 0 #991b1b;" onclick="closeAuction()">CHIUDI ASTA</button>
-                </div>
-                <div class="search-container">
-                    <input type="text" id="player-search" class="search-bar" placeholder="Cerca giocatore o squadra..." onkeyup="renderMarket()">
-                </div>
-                <div class="category-header" onclick="toggleCategory('cat-terzini')">
-                    <span>TERZINI (TER)</span>
-                    <span id="arrow-terzini" style="transition: 0.3s;">▼</span>
-                </div>
-                <div id="cat-terzini" class="category-content active">
-                    <div id="market-players" class="market-inner"></div>
-                </div>
-            </section>
-            <section id="rosa" class="content-section">
-                <h2 style="font-family:'Exo 2';">LA TUA FORMAZIONE</h2>
-                <div class="handball-field">
-                    <div id="slot-PO" class="player-slot pos-po" onclick="handleSlotClick('PO')">PO</div>
-                    <div id="slot-AS" class="player-slot pos-as" onclick="handleSlotClick('AS')">AS</div>
-                    <div id="slot-TS" class="player-slot pos-ts" onclick="handleSlotClick('TS')">TS</div>
-                    <div id="slot-CE" class="player-slot pos-ce" onclick="handleSlotClick('CE')">CE</div>
-                    <div id="slot-TD" class="player-slot pos-td" onclick="handleSlotClick('TD')">TD</div>
-                    <div id="slot-AD" class="player-slot pos-ad" onclick="handleSlotClick('AD')">AD</div>
-                    <div id="slot-PI" class="player-slot pos-pi" onclick="handleSlotClick('PI')">PI</div>
-                </div>
-                <div id="my-rosa" style="margin-top: 20px;"></div>
-            </section>
-        </main>
+
+            <main>
+                <section id="home" class="content-section active">
+                    <h2 id="user-greeting">Ciao!</h2>
+                    <p>Lega Attuale: <b id="league-name-display" style="color:var(--accent-orange)">-</b></p>
+                    <div style="background:var(--glass); padding:20px; border-radius:15px; border:1px solid rgba(255,255,255,0.1)">
+                        <p>I tuoi Crediti: <b id="budget-display" style="font-size:1.5rem">100</b></p>
+                    </div>
+                </section>
+
+                <section id="leghe" class="content-section">
+                    <h2>LEGHE ATTIVE</h2>
+                    <div id="league-list"></div>
+                </section>
+
+                <section id="mercato" class="content-section">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h2>ASTA LIVE</h2>
+                        <div>
+                            <button id="start-btn" onclick="toggleAuction(true)" style="background:#22c55e; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer;">AVVIA ASTA</button>
+                            <button id="stop-btn" onclick="closeAuction()" style="display:none; background:#ef4444; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer;">CHIUDI ASTA</button>
+                        </div>
+                    </div>
+                    <div id="market-players"></div>
+                </section>
+
+                <section id="rosa" class="content-section">
+                    <h2>IL TUO TEAM</h2>
+                    <div class="handball-field">
+                        <div id="slot-PO" class="player-slot pos-po" onclick="removeFromField('PO')">PO</div>
+                        <div id="slot-AS" class="player-slot pos-as" onclick="removeFromField('AS')">AS</div>
+                        <div id="slot-TS" class="player-slot pos-ts" onclick="removeFromField('TS')">TS</div>
+                        <div id="slot-CE" class="player-slot pos-ce" onclick="removeFromField('CE')">CE</div>
+                        <div id="slot-TD" class="player-slot pos-td" onclick="removeFromField('TD')">TD</div>
+                        <div id="slot-AD" class="player-slot pos-ad" onclick="removeFromField('AD')">AD</div>
+                        <div id="slot-PI" class="player-slot pos-pi" onclick="removeFromField('PI')">PI</div>
+                    </div>
+                    <div id="my-rosa-list" style="margin-top:20px;"></div>
+                </section>
+            </main>
+        </div>
     </div>
 
     <script>
         // --- CONFIGURAZIONE FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyCTqPPwpfNElGluzwjv9nsy8EYBzJUXm2M",
-            // Ho cambiato l'URL con quello completo che Firebase solitamente si aspetta per il Realtime DB
             databaseURL: "https://fantahandaball-default-rtdb.europe-west1.firebasedatabase.app/", 
-            authDomain: "fantahandaball.firebaseapp.com",
             projectId: "fantahandaball",
             storageBucket: "fantahandaball.firebasestorage.app",
-            messagingSenderId: "346312156685",
-            appId: "1:346312156685:web:13cee4784534ad7f95d744"
         };
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // --- STATO APP ---
+        let userName = "";
+        let currentLeague = "";
         let budget = 100;
         let auctionActive = false;
         let currentBids = {};
         let myTeam = [];
         let fieldOccupancy = {};
-        let userName = "";
-        let currentLeague = "";
 
         let players = [
             { id: 1, name: "Cristian Falsaperla", team: "New Handball", role: "TER" },
@@ -278,122 +189,147 @@
             { id: 5, name: "Leonardo Livoli", team: "Albatro", role: "TER" },
             { id: 6, name: "Pasquale Caruso", team: "Avola", role: "TER" },
             { id: 7, name: "Francesco Rendo", team: "Modica", role: "TER" },
-            { id: 8, name: "Leonardo Mineo", team: "TH", role: "TER" },
-            { id: 9, name: "Federico De Vita", team: "Svincolato", role: "TER" },
-            { id: 10, name: "Paolo Grioli", team: "Messina", role: "TER" },
-            { id: 11, name: "Leonardo Cinnirella", team: "Albatro", role: "TER" },
-            { id: 12, name: "Kevin Tordonato", team: "Girgenti", role: "TER" },
-            { id: 13, name: "Elia Santanastasio", team: "Avola", role: "TER" },
-            { id: 14, name: "Riccardo Garofalo", team: "Aretusa", role: "TER" },
-            { id: 15, name: "Marwan Haddahani", team: "Girgenti", role: "TER" },
-            { id: 16, name: "Samuele Orlando", team: "New Handball Mascalucia", role: "TER" },
-            { id: 17, name: "Solomon", team: "Mottroina", role: "TER" },
-            { id: 18, name: "Salvo Spalletta", team: "Mottroiana", role: "TER" },
-            { id: 19, name: "Roberto Abbate", team: "Messina", role: "TER" },
-            { id: 20, name: "Giuseppe Scudisco", team: "Th Mascalucia", role: "TER" },
-            { id: 21, name: "Vito Miceli", team: "Marsala", role: "TER" },
-            { id: 22, name: "Salvo Coniglione", team: "New Handball", role: "TER" },
-            { id: 23, name: "Gabriele Tilotta", team: "Albatro", role: "TER" },
-            { id: 24, name: "Carlo Alfieri", team: "Albatro", role: "TER" },
-            { id: 25, name: "Vincenzo Amore", team: "Albatro", role: "TER" }
+            { id: 8, name: "Leonardo Mineo", team: "TH", role: "TER" }
         ];
 
+        // --- LOGICA DI ACCESSO E SINCRONIZZAZIONE ---
         function enterSite() {
-            userName = document.getElementById('username').value;
-            currentLeague = document.getElementById('league-input').value;
-            if (!userName || !currentLeague) return alert("Dati mancanti!");
+            userName = document.getElementById('username').value.trim();
+            currentLeague = document.getElementById('league-input').value.trim();
             
+            if (!userName || !currentLeague) return alert("Inserisci Nome e Lega!");
+
             document.getElementById('login-overlay').style.display = "none";
             document.getElementById('site-content').style.display = "block";
-            setTimeout(() => document.getElementById('site-content').style.opacity = "1", 50);
             
             document.getElementById('user-greeting').innerText = "Bentornato, " + userName + "!";
             document.getElementById('league-name-display').innerText = currentLeague;
-            document.getElementById('league-list').innerHTML = `<div class="league-card"><div><h3 style="margin:0">${currentLeague}</h3><p style="margin:5px 0 0 0">Admin: ${userName} • Membri: 1/7 • Stato: Attiva</p></div><button class="btn-entra">ENTRA</button></div>`;
-            
+
+            // 1. Registra la lega su DB
+            db.ref('leagues/' + currentLeague).update({ admin: userName, active: true });
+
+            // 2. Ascolta la lista globale delle leghe (per altri telefoni)
+            db.ref('leagues').on('value', (snapshot) => {
+                const list = snapshot.val();
+                const container = document.getElementById('league-list');
+                container.innerHTML = "";
+                for (let id in list) {
+                    container.innerHTML += `
+                        <div class="league-card">
+                            <span><b>${id}</b> (Admin: ${list[id].admin})</span>
+                            <button onclick="joinLeague('${id}')" style="padding:5px 10px; cursor:pointer">UNISCITI</button>
+                        </div>`;
+                }
+            });
+
+            listenToLeagueData();
+        }
+
+        function joinLeague(id) {
+            currentLeague = id;
+            document.getElementById('league-name-display').innerText = currentLeague;
+            listenToLeagueData();
+            showSection('home', document.querySelector('.nav-item'));
+            alert("Sei entrato in: " + id);
+        }
+
+        function listenToLeagueData() {
+            // Ascolta Cambiamenti Asta e Offerte in tempo reale
             db.ref('leagues/' + currentLeague).on('value', (snapshot) => {
                 const data = snapshot.val() || {};
                 auctionActive = data.auctionActive || false;
                 currentBids = data.bids || {};
-                toggleAuctionUI(auctionActive);
+                
+                // Aggiorna UI Tasti Asta
+                document.getElementById('start-btn').style.display = auctionActive ? "none" : "block";
+                document.getElementById('stop-btn').style.display = auctionActive ? "block" : "none";
+                
                 renderMarket();
             });
         }
 
-        function toggleCategory(id) {
-            const content = document.getElementById(id);
-            content.classList.toggle('active');
-        }
-
+        // --- LOGICA MERCATO ---
         function renderMarket() {
             const container = document.getElementById('market-players');
-            const searchTerm = document.getElementById('player-search').value.toLowerCase();
-            container.innerHTML = `<h3 class="market-header">GIOCATORI DISPONIBILI</h3>`;
-            const filteredPlayers = players.filter(p => p.name.toLowerCase().includes(searchTerm) || p.team.toLowerCase().includes(searchTerm));
-            filteredPlayers.forEach(p => {
+            container.innerHTML = "";
+
+            players.forEach(p => {
                 const bid = currentBids[p.id];
-                const bidText = bid ? `<div class="bid-info">Offerta attuale: ${bid.amount} cr. da ${bid.user}</div>` : '';
-                container.innerHTML += `<div class="player-card"><div><b>${p.name}</b> <br><small>${p.team}</small>${bidText}</div><div class="bid-controls"><input type="number" id="bid-${p.id}" class="bid-input" value="${bid ? bid.amount + 1 : 1}"><button class="bid-btn" onclick="placeBid(${p.id})">OFFRI</button></div></div>`;
+                const bidHtml = bid ? `<div class="bid-info">Attuale: ${bid.amount} cr. (${bid.user})</div>` : `<div class="bid-info">Nessuna offerta</div>`;
+                
+                container.innerHTML += `
+                    <div class="player-card">
+                        <div><b>${p.name}</b> <small>${p.team}</small>${bidHtml}</div>
+                        <div class="bid-controls">
+                            <input type="number" id="input-${p.id}" class="bid-input" value="${bid ? bid.amount + 1 : 1}">
+                            <button onclick="placeBid(${p.id})" style="background:#22c55e; color:white; border:none; border-radius:5px; cursor:pointer" ${!auctionActive ? 'disabled' : ''}>OFFRI</button>
+                        </div>
+                    </div>`;
             });
         }
 
-        function toggleAuction(active) {
-            db.ref('leagues/' + currentLeague).update({ auctionActive: active });
+        function toggleAuction(status) {
+            db.ref('leagues/' + currentLeague).update({ auctionActive: status });
         }
 
-        function toggleAuctionUI(active) {
-            document.getElementById('start-btn').style.display = active ? "none" : "inline-block";
-            document.getElementById('stop-btn').style.display = active ? "inline-block" : "none";
-        }
+        function placeBid(playerId) {
+            const amount = parseInt(document.getElementById(`input-${playerId}`).value);
+            const currentMax = currentBids[playerId] ? currentBids[playerId].amount : 0;
 
-        function placeBid(id) {
-            if(!auctionActive) return alert("Asta non attiva!");
-            const val = parseInt(document.getElementById(`bid-${id}`).value);
-            if(val > budget) return alert("Budget superato!");
-            db.ref('leagues/' + currentLeague + '/bids/' + id).set({ amount: val, user: userName });
+            if (amount <= currentMax) return alert("Offerta troppo bassa!");
+            if (amount > budget) return alert("Crediti insufficienti!");
+
+            db.ref('leagues/' + currentLeague + '/bids/' + playerId).set({
+                amount: amount,
+                user: userName
+            });
         }
 
         function closeAuction() {
+            // Assegna i giocatori in base alle offerte finali
             for (let id in currentBids) {
-                const pIdx = players.findIndex(p => p.id == id);
-                if (pIdx > -1) {
-                    budget -= currentBids[id].amount;
-                    myTeam.push({ ...players[pIdx] });
-                    players.splice(pIdx, 1);
+                const bid = currentBids[id];
+                if (bid.user === userName) {
+                    const player = players.find(p => p.id == id);
+                    if (player) {
+                        myTeam.push(player);
+                        budget -= bid.amount;
+                    }
                 }
+                // Rimuovi dai disponibili
+                players = players.filter(p => p.id != id);
             }
+            
             document.getElementById('budget-display').innerText = budget;
             db.ref('leagues/' + currentLeague).update({ auctionActive: false, bids: null });
-            renderMarket();
+            renderMyRosa();
         }
 
-        function handleSlotClick(role) {
-            if (fieldOccupancy[`slot-${role}`]) removeFromField(role);
-            else filterByRole(role);
-        }
-
-        function filterByRole(role) {
-            const container = document.getElementById('my-rosa');
-            const filtered = myTeam.filter(p => !Object.values(fieldOccupancy).includes(p.name) && ( (role === 'TS' || role === 'CE' || role === 'TD') ? p.role === 'TER' : p.role === role ));
-            container.innerHTML = `<h3 style="color:var(--accent-orange)">Scegli per ${role}</h3>`;
-            filtered.forEach(p => {
-                container.innerHTML += `<div class="rosa-item"><span>${p.name}</span><button class="btn-add-3d" onclick="addToField('${p.name}', '${role}')">+</button></div>`;
+        // --- LOGICA ROSA ---
+        function renderMyRosa() {
+            const list = document.getElementById('my-rosa-list');
+            list.innerHTML = "<h3>I tuoi acquisti:</h3>";
+            myTeam.forEach(p => {
+                list.innerHTML += `<div class="league-card">${p.name} (${p.role}) <button onclick="addToField('${p.name}', '${p.role}')">SCHIERA</button></div>`;
             });
         }
 
         function addToField(name, role) {
-            fieldOccupancy[`slot-${role}`] = name;
-            const slot = document.getElementById(`slot-${role}`);
+            // Semplificazione: per ora schiera nel primo slot libero o fisso
+            const slotMap = { "TER": "TS", "PO": "PO" }; // Esempio logica
+            const slotId = slotMap[role] || "CE";
+            
+            const slot = document.getElementById(`slot-${slotId}`);
+            slot.innerText = name.split(' ').pop();
             slot.classList.add('occupied');
-            slot.innerText = name.split(' ').pop().toUpperCase();
-            document.getElementById('my-rosa').innerHTML = "";
+            fieldOccupancy[slotId] = name;
         }
 
-        function removeFromField(role) {
-            delete fieldOccupancy[`slot-${role}`];
-            const slot = document.getElementById(`slot-${role}`);
+        function removeFromField(slotId) {
+            const slot = document.getElementById(`slot-${slotId}`);
+            slot.innerText = slotId;
             slot.classList.remove('occupied');
-            slot.innerText = role;
+            delete fieldOccupancy[slotId];
         }
 
         function showSection(id, el) {
@@ -401,8 +337,8 @@
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
+            if(id === 'rosa') renderMyRosa();
         }
     </script>
-</body></html>
-
-
+</body>
+</html>
